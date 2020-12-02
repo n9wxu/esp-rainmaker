@@ -67,7 +67,7 @@ dkms.conf
 .DS_Store
 
 # Application project files
-**/sdkconfig
+# **/sdkconfig
 **/sdkconfig.old
 **/build
 **/cloud_cfg/*.key

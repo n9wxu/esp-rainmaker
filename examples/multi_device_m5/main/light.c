@@ -117,7 +117,7 @@ void light_set_on(bool on)
     else
     {
         np_clear(&px);
-        display_switch_off();
+        display_lights_off();
     }    
     np_show(&px,RMT_CHANNEL_0);
 }

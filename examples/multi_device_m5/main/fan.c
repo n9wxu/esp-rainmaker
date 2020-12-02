@@ -8,12 +8,14 @@
 #include <esp_rmaker_standard_types.h> 
 #include <esp_rmaker_standard_params.h> 
 
+#include "display.h"
+
 #include "user_parameters.h"
 
 #define TAG "FAN"
 
 static esp_rmaker_device_t *fan_device;
-static int g_fanSpeed = 0;
+static int g_fan_speed = DEFAULT_FAN_SPEED;
 
 /* Callback to handle commands received from the RainMaker cloud */
 static esp_err_t fan_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *param,
@@ -24,10 +26,22 @@ static esp_err_t fan_cb(const esp_rmaker_device_t *device, const esp_rmaker_para
     }
     const char *device_name = esp_rmaker_device_get_name(device);
     const char *param_name = esp_rmaker_param_get_name(param);
-    if (strcmp(param_name, ESP_RMAKER_DEF_SPEED_NAME) == 0) {
+    if (strcmp(param_name, ESP_RMAKER_DEF_POWER_NAME) == 0) {
+        ESP_LOGI(TAG, "Received value = %s for %s - %s",
+                val.val.b? "true" : "false", device_name, param_name);
+        if(val.val.b)
+        {
+            fan_set_speed(g_fan_speed);
+        }
+        else
+        {
+            fan_set_speed(0);
+        }
+    } else if (strcmp(param_name, ESP_RMAKER_DEF_SPEED_NAME) == 0) {
         ESP_LOGI(TAG, "Received value = %d for %s - %s",
                 val.val.i, device_name, param_name);
-        fan_set_speed(val.val.i);
+        g_fan_speed = val.val.i;
+        fan_set_speed(g_fan_speed);
     } else {
         /* Silently ignoring invalid params */
         return ESP_OK;
@@ -47,6 +61,13 @@ void fan_init(esp_rmaker_node_t *node)
 
 void fan_set_speed(int speed)
 {
-    g_fanSpeed = speed;
+    if(speed == 0)
+    {
+        display_fan_off();
+    }
+    else
+    {
+        display_fan_spinning(speed);
+    }
 }
 
