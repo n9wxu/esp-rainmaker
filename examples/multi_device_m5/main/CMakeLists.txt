@@ -5,5 +5,6 @@ idf_component_register(SRCS
         ./temperature.c
         ./switch.c
         ./display.c
+        ./img_light.c
         INCLUDE_DIRS ".")
 
