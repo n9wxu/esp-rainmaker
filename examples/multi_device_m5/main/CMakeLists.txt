@@ -5,6 +5,21 @@ idf_component_register(SRCS
         ./temperature.c
         ./switch.c
         ./display.c
-        ./img_light.c
+        ./button_off.c
+        ./button_on.c
+        ./one.c
+        ./two.c
+        ./three.c
+        ./four.c
+        ./five.c
+        ./six.c
+        ./seven.c
+        ./eight.c
+        ./nine.c
+        ./ten.c
+        ./eleven.c
+        ./house_on.c
+        ./house_off.c
+        ./thermometer.c
         INCLUDE_DIRS ".")
 

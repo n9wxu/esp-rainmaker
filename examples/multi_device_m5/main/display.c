@@ -10,21 +10,23 @@
 
 extern SemaphoreHandle_t xGuiSemaphore;
 
-LV_IMG_DECLARE(img_light);
+LV_IMG_DECLARE(HouseOn);
+LV_IMG_DECLARE(HouseOff);
+LV_IMG_DECLARE(Thermometer);
+LV_IMG_DECLARE(ButtonOn);
+LV_IMG_DECLARE(ButtonOff);
+LV_IMG_DECLARE(one);
+LV_IMG_DECLARE(two);
+LV_IMG_DECLARE(three);
+LV_IMG_DECLARE(four);
+LV_IMG_DECLARE(five);
+LV_IMG_DECLARE(six);
+LV_IMG_DECLARE(seven);
+LV_IMG_DECLARE(eight);
+LV_IMG_DECLARE(nine);
+LV_IMG_DECLARE(ten);
+LV_IMG_DECLARE(eleven);
 
-// LV_IMG_DECLARE(img_fan_off);
-// LV_IMG_DECLARE(img_fan0);
-// LV_IMG_DECLARE(img_fan1);
-// LV_IMG_DECLARE(img_fan2);
-// LV_IMG_DECLARE(img_fan3);
-// LV_IMG_DECLARE(img_fan4);
-// LV_IMG_DECLARE(img_fan5);
-// LV_IMG_DECLARE(img_fan6);
-// LV_IMG_DECLARE(img_fan7);
-
-// LV_IMG_DECLARE(img_switch);
-
-// LV_IMG_DECLARE(img_thermometer);
 
 static lv_obj_t *light_object;
 static lv_obj_t *fan_object;
@@ -90,13 +92,20 @@ static void display_setupscreen()
         xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
 
         light_object = lv_img_create(lv_scr_act(), NULL);
-        lv_img_set_src(light_object, &img_light);
+        lv_img_set_src(light_object, &HouseOn);
         lv_obj_set_pos(light_object, 0,20);
 
-        lv_obj_t * test_label = lv_label_create(lv_scr_act(), NULL);
-        lv_obj_set_pos(test_label, 10, 5);
-        lv_label_set_align(test_label, LV_LABEL_ALIGN_LEFT);
-        lv_label_set_text(test_label, "Test");
+        fan_object = lv_img_create(lv_scr_act(), NULL);
+        lv_img_set_src(fan_object, &one);
+        lv_obj_set_pos(fan_object, 220,0);
+
+        switch_object = lv_img_create(lv_scr_act(), NULL);
+        lv_img_set_src(switch_object, &ButtonOn);
+        lv_obj_set_pos(switch_object, 220,120);
+
+        temperature_object = lv_img_create(lv_scr_act(), NULL);
+        lv_img_set_src(temperature_object, &Thermometer);
+        lv_obj_set_pos(temperature_object, 220,160);
 
         xSemaphoreGive(xGuiSemaphore);
 
