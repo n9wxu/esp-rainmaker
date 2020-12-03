@@ -13,8 +13,7 @@
 
 #include "display.h"
 
-#include <sk6812.h>
-//#include <axp192.h>
+#include "sk6812.h"
 
 #define TAG "light"
 
@@ -89,9 +88,9 @@ void light_init(esp_rmaker_node_t *node)
     px.timings.reset = 80000;
     px.pixels = pixelBuffer;
     neopixel_init(light_pin, RMT_CHANNEL_0);
-    light_set_on(isOn);
+    light_set_hsv(hue,saturation,brightness);
 
-        /* Create a Light device and add the relevant parameters to it */
+    /* Create a Light device and add the relevant parameters to it */
     light_device = esp_rmaker_lightbulb_device_create("Light", NULL, DEFAULT_LIGHT_POWER);
     esp_rmaker_device_add_cb(light_device, light_cb, NULL);
     

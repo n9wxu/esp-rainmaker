@@ -40,8 +40,6 @@ void app_main()
     spi_mutex = xSemaphoreCreateMutex();
 
     Core2ForAWS_Init();
-    FT6336U_Init();
-    display_init();
 
     /* Initialize NVS. */
     esp_err_t err = nvs_flash_init();
@@ -50,6 +48,8 @@ void app_main()
         err = nvs_flash_init();
     }
     ESP_ERROR_CHECK( err );
+
+    display_init();
 
     /* Initialize Wi-Fi. Note that, this should be called before esp_rmaker_init()
      */
@@ -96,4 +96,5 @@ void app_main()
         vTaskDelay(5000/portTICK_PERIOD_MS);
         abort();
     }
+
 }

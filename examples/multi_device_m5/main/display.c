@@ -37,6 +37,8 @@ static int g_fan_speed = 0;
 static int g_object_position = 0;
 static bool left = true;
 
+static bool screenConfigured = false;
+
 static void spin_update(void *priv)
 {
     if(ESP_OK == xSemaphoreTake(xGuiSemaphore, 1000))
@@ -75,66 +77,81 @@ static void spin_update(void *priv)
 
 void display_init()
 {
-    Core2ForAWS_LCD_Init();
-    Core2ForAWS_LCD_SetBrightness(100);
+    screenConfigured = false;
+}
 
-   xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
+static void display_setupscreen()
+{
+    if(!screenConfigured)
+    {
+        Core2ForAWS_LCD_Init();
+        Core2ForAWS_LCD_SetBrightness(100);
 
-    light_object = lv_img_create(lv_scr_act(), NULL);
-    lv_img_set_src(light_object, &img_light);
-    lv_obj_set_pos(light_object, 0,20);
+        xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
 
-    lv_obj_t * test_label = lv_label_create(lv_scr_act(), NULL);
-    lv_obj_set_pos(test_label, 10, 5);
-    lv_label_set_align(test_label, LV_LABEL_ALIGN_LEFT);
-    lv_label_set_text(test_label, "Test");
+        light_object = lv_img_create(lv_scr_act(), NULL);
+        lv_img_set_src(light_object, &img_light);
+        lv_obj_set_pos(light_object, 0,20);
 
-    xSemaphoreGive(xGuiSemaphore);
+        lv_obj_t * test_label = lv_label_create(lv_scr_act(), NULL);
+        lv_obj_set_pos(test_label, 10, 5);
+        lv_label_set_align(test_label, LV_LABEL_ALIGN_LEFT);
+        lv_label_set_text(test_label, "Test");
 
-    esp_timer_create_args_t spin_timer_conf = {
-        .callback = spin_update,
-        .dispatch_method = ESP_TIMER_TASK,
-        .name = "spin_update_tm"
-    };
-    if (esp_timer_create(&spin_timer_conf, &spin_timer) == ESP_OK) {
-        esp_timer_start_periodic(spin_timer, 200U);
+        xSemaphoreGive(xGuiSemaphore);
+
+        esp_timer_create_args_t spin_timer_conf = {
+            .callback = spin_update,
+            .dispatch_method = ESP_TIMER_TASK,
+            .name = "spin_update_tm"
+        };
+        if (esp_timer_create(&spin_timer_conf, &spin_timer) == ESP_OK) {
+            esp_timer_start_periodic(spin_timer, 200U);
+        }
+
+        screenConfigured = true;
     }
-
 }
 
 void display_lights_off(void)
 {
+    display_setupscreen();
     ESP_LOGI("display","lights off");
 }
 
 void display_lights_on(int h, int s, int v)
 {
+    display_setupscreen();
     ESP_LOGI("display","lights on");
-
 }
 
 void display_fan_spinning(int s)
 {
+    display_setupscreen();
     g_fan_speed = s;
     ESP_LOGI("display","fan spinning %d",s);
 }
 
 void display_fan_off()
 {
+    display_setupscreen();
     ESP_LOGI("display","fan off");
 }
 
 void display_switch_on()
 {
+    display_setupscreen();
     ESP_LOGI("display","switch on");
 }
 
 void display_switch_off()
 {
+    display_setupscreen();
     ESP_LOGI("display","switch off");
 }
 
 void display_temperature(int c)
 {
+    display_setupscreen();
     ESP_LOGI("display","temperature %d",c);
 }
