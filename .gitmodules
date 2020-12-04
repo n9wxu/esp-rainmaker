@@ -7,3 +7,6 @@
 [submodule "examples/multi_device_m5/components/TFT_eSPI"]
 	path = examples/multi_device_m5/components/TFT_eSPI
 	url = https://github.com/Bodmer/TFT_eSPI.git
+[submodule "examples/multi_device_m5/components/core2forAWS"]
+	path = examples/multi_device_m5/components/core2forAWS
+	url = https://github.com/rashedtalukder/core2foraws-bsp.git

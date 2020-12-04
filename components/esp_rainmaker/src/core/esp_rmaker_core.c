@@ -485,8 +485,8 @@ esp_err_t esp_rmaker_start()
         esp_rmaker_time_sync_init(NULL);
     }
     ESP_LOGI(TAG, "Starting RainMaker Core Task");
-    if (xTaskCreate(&esp_rmaker_task, "esp_rmaker_task", ESP_RMAKER_TASK_STACK,
-                NULL, ESP_RMAKER_TASK_PRIORITY, NULL) != pdPASS) {
+    if (xTaskCreatePinnedToCore(&esp_rmaker_task, "esp_rmaker_task", ESP_RMAKER_TASK_STACK,
+                NULL, ESP_RMAKER_TASK_PRIORITY, NULL,0) != pdPASS) {
         ESP_LOGE(TAG, "Couldn't create RainMaker core task");
         return ESP_FAIL;
     }
