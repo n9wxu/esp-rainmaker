@@ -18,6 +18,7 @@ idf_component_register(SRCS
         ./nine.c
         ./ten.c
         ./eleven.c
+        ./fanoff.c
         ./house_on.c
         ./house_off.c
         ./thermometer.c

@@ -8,6 +8,8 @@
 
 #include "lvgl/lvgl.h"
 
+#include "ft6336u.h"
+
 extern SemaphoreHandle_t xGuiSemaphore;
 
 LV_IMG_DECLARE(HouseOn);
@@ -15,6 +17,7 @@ LV_IMG_DECLARE(HouseOff);
 LV_IMG_DECLARE(Thermometer);
 LV_IMG_DECLARE(ButtonOn);
 LV_IMG_DECLARE(ButtonOff);
+LV_IMG_DECLARE(fanoff);
 LV_IMG_DECLARE(one);
 LV_IMG_DECLARE(two);
 LV_IMG_DECLARE(three);
@@ -27,58 +30,44 @@ LV_IMG_DECLARE(nine);
 LV_IMG_DECLARE(ten);
 LV_IMG_DECLARE(eleven);
 
+static const lv_img_dsc_t* fanImages[] = {&one,&two,&three,&four,&five,&six,&seven,&eight,&nine,&ten,&eleven};
 
 static lv_obj_t *light_object;
 static lv_obj_t *fan_object;
-static lv_obj_t *switch_object;
 static lv_obj_t *temperature_object;
 
 static esp_timer_handle_t spin_timer;
 
 static int g_fan_speed = 0;
-static int g_object_position = 0;
-static bool left = true;
-
 static bool screenConfigured = false;
 
 static void spin_update(void *priv)
 {
+    static int fan_index = 0;
     if(ESP_OK == xSemaphoreTake(xGuiSemaphore, 1000))
     {
+        const lv_img_dsc_t* image;
         if(g_fan_speed)
         {
-            // slide the image
-
-            if(g_object_position > 320 - 203)
-            {
-                left = false;
-            }
-            if(g_object_position < 0)
-            {
-                left = true;
-            }
-
-            if(left)
-            {
-                g_object_position += 2;
-            }
-            else
-            {
-                g_object_position -= 2;
-            }
-            
+            image = fanImages[fan_index++];
+            if(fan_index > 10) fan_index = 0;
         }
         else
         {
-            g_object_position = 0;
+            image = &fanoff;
         }
-        lv_obj_set_pos(light_object, g_object_position,20);
+        lv_img_set_src(fan_object, image);
+        lv_event_send_refresh(light_object);
         xSemaphoreGive(xGuiSemaphore);
     }
 }
 
 void display_init()
 {
+    Core2ForAWS_LCD_Init();
+    FT6336U_Init();
+    Core2ForAWS_LCD_SetBrightness(100);
+
     screenConfigured = false;
 }
 
@@ -86,26 +75,19 @@ static void display_setupscreen()
 {
     if(!screenConfigured)
     {
-        Core2ForAWS_LCD_Init();
-        Core2ForAWS_LCD_SetBrightness(100);
-
         xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
 
         light_object = lv_img_create(lv_scr_act(), NULL);
         lv_img_set_src(light_object, &HouseOn);
-        lv_obj_set_pos(light_object, 0,20);
+        lv_obj_set_pos(light_object, 0,0);
 
         fan_object = lv_img_create(lv_scr_act(), NULL);
         lv_img_set_src(fan_object, &one);
         lv_obj_set_pos(fan_object, 220,0);
 
-        switch_object = lv_img_create(lv_scr_act(), NULL);
-        lv_img_set_src(switch_object, &ButtonOn);
-        lv_obj_set_pos(switch_object, 220,120);
-
         temperature_object = lv_img_create(lv_scr_act(), NULL);
         lv_img_set_src(temperature_object, &Thermometer);
-        lv_obj_set_pos(temperature_object, 220,160);
+        lv_obj_set_pos(temperature_object, 185,100);
 
         xSemaphoreGive(xGuiSemaphore);
 
@@ -115,7 +97,7 @@ static void display_setupscreen()
             .name = "spin_update_tm"
         };
         if (esp_timer_create(&spin_timer_conf, &spin_timer) == ESP_OK) {
-            esp_timer_start_periodic(spin_timer, 200U);
+            esp_timer_start_periodic(spin_timer, 10U);
         }
 
         screenConfigured = true;
