@@ -64,9 +64,6 @@ static void spin_update(void *priv)
 
 void display_init()
 {
-    Core2ForAWS_LCD_Init();
-    FT6336U_Init();
-    Core2ForAWS_LCD_SetBrightness(100);
 
     screenConfigured = false;
 }
@@ -75,6 +72,9 @@ static void display_setupscreen()
 {
     if(!screenConfigured)
     {
+        Core2ForAWS_LCD_Init();
+        FT6336U_Init();
+        Core2ForAWS_LCD_SetBrightness(100);
         xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
 
         light_object = lv_img_create(lv_scr_act(), NULL);
