@@ -6,14 +6,3 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 #pragma once
-#include <stdint.h>
-#include <stdbool.h>
-
-extern esp_rmaker_device_t *fan_device;
-
-#define DEFAULT_POWER   false
-#define DEFAULT_SPEED   3
-
-void app_driver_init(void);
-esp_err_t app_fan_set_power(bool power);
-esp_err_t app_fan_set_speed(uint8_t speed);

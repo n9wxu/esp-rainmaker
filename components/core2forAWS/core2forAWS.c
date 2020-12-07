@@ -90,10 +90,13 @@ void Core2ForAWS_Motor_SetStrength(uint8_t strength) {
     }
     uint16_t volt = (uint32_t)strength * (AXP192_LDO_VOLT_MAX - AXP192_LDO_VOLT_MIN) / 100 + AXP192_LDO_VOLT_MIN;
     Axp192_SetLDO3Volt(volt);
-    if (strength == 0 && motor_state == true) {
+
+    if(strength == 0 && motor_state == true)
+    {
         motor_state = false;
         Axp192_EnableLDO3(0);
-    } else if(motor_state == false) {
+    } else if (strength && motor_state == false)
+    {
         motor_state = true;
         Axp192_EnableLDO3(1);
     }

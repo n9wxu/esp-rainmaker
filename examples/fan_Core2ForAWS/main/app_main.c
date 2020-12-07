@@ -22,41 +22,24 @@
 
 #include "app_priv.h"
 
+#include <core2forAWS.h>
+#include "display.h"
+#include "fan.h"
+
 static const char *TAG = "app_main";
 
-esp_rmaker_device_t *fan_device;
-
-/* Callback to handle commands received from the RainMaker cloud */
-static esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *param,
-            const esp_rmaker_param_val_t val, void *priv_data, esp_rmaker_write_ctx_t *ctx)
-{
-    if (ctx) {
-        ESP_LOGI(TAG, "Received write request via : %s", esp_rmaker_device_cb_src_to_str(ctx->src));
-    }
-    char *device_name = esp_rmaker_device_get_name(device);
-    char *param_name = esp_rmaker_param_get_name(param);
-    if (strcmp(param_name, ESP_RMAKER_DEF_POWER_NAME) == 0) {
-        ESP_LOGI(TAG, "Received value = %s for %s - %s",
-                val.val.b? "true" : "false", device_name, param_name);
-        app_fan_set_power(val.val.b);
-    } else if (strcmp(param_name, ESP_RMAKER_DEF_SPEED_NAME) == 0) {
-        ESP_LOGI(TAG, "Received value = %d for %s - %s",
-                val.val.i, device_name, param_name);
-        app_fan_set_speed(val.val.i);
-    } else {
-        /* Silently ignoring invalid params */
-        return ESP_OK;
-    }
-    esp_rmaker_param_update_and_report(param, val);
-    return ESP_OK;
-}
+extern SemaphoreHandle_t spi_mutex;
 
 void app_main()
 {
     /* Initialize Application specific hardware drivers and
      * set initial state.
      */
-    app_driver_init();
+    spi_mutex = xSemaphoreCreateMutex();
+
+    Core2ForAWS_Init();
+    display_init();
+    Core2ForAWS_Button_Init();
 
     /* Initialize NVS. */
     esp_err_t err = nvs_flash_init();
@@ -83,11 +66,7 @@ void app_main()
         abort();
     }
 
-    /* Create a device and add the relevant parameters to it */
-    fan_device = esp_rmaker_fan_device_create("Fan", NULL, DEFAULT_POWER);
-    esp_rmaker_device_add_cb(fan_device, write_cb, NULL);
-    esp_rmaker_device_add_param(fan_device, esp_rmaker_speed_param_create(ESP_RMAKER_DEF_SPEED_NAME, DEFAULT_SPEED));
-    esp_rmaker_node_add_device(node, fan_device);
+    fan_init(node);
 
     /* Enable scheduling.
      * Please note that you also need to set the timezone for schedules to work correctly.
