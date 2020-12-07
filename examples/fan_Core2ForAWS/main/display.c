@@ -42,16 +42,25 @@ static bool screenConfigured = false;
 static void spin_update(void *priv)
 {
     int fan_index = 0;
+    int speed_skip=0;
     while(1)
     {
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(50));
         if(pdTRUE == xSemaphoreTake(xGuiSemaphore, 0))
         {
             if(g_fan_speed && g_fan_power)
             {
                 ESP_LOGI("spin","Fan Index %d",fan_index);
-                lv_img_set_src(fan_object, fanImages[fan_index++]);
-                if(fan_index >= (sizeof(fanImages)/sizeof(*fanImages))) fan_index = 0;
+                if(speed_skip == 0)
+                {
+                    lv_img_set_src(fan_object, fanImages[fan_index++]);
+                    if(fan_index >= (sizeof(fanImages)/sizeof(*fanImages))) fan_index = 0;
+                    speed_skip = 5 - g_fan_speed;
+                }
+                else
+                {
+                    speed_skip --;
+                }
             }
             else
             {
@@ -91,7 +100,7 @@ void display_fan_init()
 
     xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
 
-    ESP_LOGI(TAG,"configuring the display");
+    ESP_LOGI(TAG,"configuring the fan");
 
     fan_object = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(fan_object, &fanoff);
@@ -119,7 +128,20 @@ void display_fan_init()
 
     xTaskCreatePinnedToCore(spin_update, "fan", 4096, NULL, 2, NULL, 1);
 
-    ESP_LOGI(TAG,"display configured");
+    ESP_LOGI(TAG,"fan configured");
+}
+
+void display_house_init()
+{
+    xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
+    ESP_LOGI(TAG,"configuring the house");
+
+    light_object = lv_img_create(lv_scr_act(),NULL);
+    lv_img_set_src(light_object, &HouseOff);
+    lv_obj_align(light_object,lv_scr_act(),LV_ALIGN_IN_TOP_LEFT,0,0);
+
+    xSemaphoreGive(xGuiSemaphore);
+    ESP_LOGI(TAG,"house configured");
 }
 
 void display_lights_off(void)
