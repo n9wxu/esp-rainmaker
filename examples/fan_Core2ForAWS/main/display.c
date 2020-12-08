@@ -16,18 +16,18 @@
 
 extern SemaphoreHandle_t xGuiSemaphore;
 
-LV_IMG_DECLARE(HouseOn);
-LV_IMG_DECLARE(HouseOff);
-LV_IMG_DECLARE(Thermometer);
-LV_IMG_DECLARE(fanoff);
-LV_IMG_DECLARE(one);
-LV_IMG_DECLARE(three);
-LV_IMG_DECLARE(five);
-LV_IMG_DECLARE(seven);
-LV_IMG_DECLARE(nine);
-LV_IMG_DECLARE(eleven);
+LV_IMG_DECLARE(house_on);
+LV_IMG_DECLARE(house_off);
+LV_IMG_DECLARE(thermometer);
+LV_IMG_DECLARE(fan_off);
+LV_IMG_DECLARE(fan_1);
+LV_IMG_DECLARE(fan_2);
+LV_IMG_DECLARE(fan_3);
+LV_IMG_DECLARE(fan_4);
+LV_IMG_DECLARE(fan_5);
+LV_IMG_DECLARE(fan_6);
 
-static const lv_img_dsc_t* fanImages[] = {&one,&three,&five,&seven,&nine,&eleven};
+static const lv_img_dsc_t* fanImages[] = {&fan_1,&fan_2,&fan_3,&fan_4,&fan_5,&fan_6};
 
 static lv_obj_t *light_object;
 static lv_obj_t *fan_object;
@@ -64,7 +64,7 @@ static void spin_update(void *priv)
             }
             else
             {
-                lv_img_set_src(fan_object, &fanoff);
+                lv_img_set_src(fan_object, &fan_off);
             }
             xSemaphoreGive(xGuiSemaphore);
         }
@@ -103,7 +103,7 @@ void display_fan_init()
     ESP_LOGI(TAG,"configuring the fan");
 
     fan_object = lv_img_create(lv_scr_act(), NULL);
-    lv_img_set_src(fan_object, &fanoff);
+    lv_img_set_src(fan_object, &fan_off);
     lv_obj_align(fan_object, lv_scr_act(), LV_ALIGN_IN_TOP_RIGHT, 0, 0);
     ESP_LOGI(TAG,"configured fan_object");
 
@@ -137,7 +137,7 @@ void display_house_init()
     ESP_LOGI(TAG,"configuring the house");
 
     light_object = lv_img_create(lv_scr_act(),NULL);
-    lv_img_set_src(light_object, &HouseOff);
+    lv_img_set_src(light_object, &house_off);
     lv_obj_align(light_object,lv_scr_act(),LV_ALIGN_IN_TOP_LEFT,0,0);
 
     xSemaphoreGive(xGuiSemaphore);

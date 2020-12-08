@@ -1,6 +1,0 @@
-This is the color of the chroma key areas of the house and thermometer images
-
-Red = 38
-Green = 251
-Blue = 12
-

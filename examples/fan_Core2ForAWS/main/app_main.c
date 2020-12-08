@@ -25,6 +25,7 @@
 #include <core2forAWS.h>
 #include "display.h"
 #include "fan.h"
+#include "light.h"
 
 static const char *TAG = "app_main";
 
@@ -67,6 +68,7 @@ void app_main()
     }
 
     fan_init(node);
+    light_init(node);
 
     /* Enable scheduling.
      * Please note that you also need to set the timezone for schedules to work correctly.

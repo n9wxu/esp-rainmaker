@@ -3,6 +3,7 @@
 
 void display_init();
 void display_fan_init();
+void display_house_init();
 
 void display_lights_off(void);
 void display_lights_on(int h, int s, int v);
