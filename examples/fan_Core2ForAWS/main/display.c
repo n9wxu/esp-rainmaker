@@ -29,6 +29,10 @@ LV_IMG_DECLARE(fan_6);
 
 static const lv_img_dsc_t* fanImages[] = {&fan_1,&fan_2,&fan_3,&fan_4,&fan_5,&fan_6};
 
+#define CANVAS_WIDTH 100
+#define CANVAS_HEIGHT 60
+static lv_color_t window_buffer[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(CANVAS_WIDTH,CANVAS_HEIGHT)];
+static lv_obj_t *window_object;
 static lv_obj_t *light_object;
 static lv_obj_t *fan_object;
 static lv_obj_t *temperature_object;
@@ -135,9 +139,21 @@ void display_house_init()
     xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
     ESP_LOGI(TAG,"configuring the house");
 
+    
     light_object = lv_img_create(lv_scr_act(),NULL);
     lv_img_set_src(light_object, &house_off);
     lv_obj_align(light_object,lv_scr_act(),LV_ALIGN_IN_TOP_LEFT,0,0);
+
+    window_object = lv_canvas_create(lv_scr_act(),NULL);
+    lv_obj_align(window_object, light_object, LV_ALIGN_CENTER,-CANVAS_WIDTH/2,-20);
+    lv_canvas_set_buffer(window_object, window_buffer, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_INDEXED_1BIT);
+    lv_canvas_set_palette(window_object,0,LV_COLOR_TRANSP);
+    lv_canvas_set_palette(window_object,1,LV_COLOR_RED);
+    lv_color_t c;
+    c.full = 1;
+    lv_canvas_fill_bg(window_object,c,LV_OPA_100);
+
+    lv_obj_move_background(window_object);
 
     xSemaphoreGive(xGuiSemaphore);
     ESP_LOGI(TAG,"house configured");
@@ -156,6 +172,10 @@ void display_lights_off(void)
 void display_lights_on(int h, int s, int v)
 {
     xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
+
+    lv_color_t c = lv_color_hsv_to_rgb(h,s,v);
+
+    lv_canvas_set_palette(window_object,1,c);
 
     lv_img_set_src(light_object, &house_on);
 
