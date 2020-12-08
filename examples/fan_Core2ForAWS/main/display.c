@@ -50,7 +50,6 @@ static void spin_update(void *priv)
         {
             if(g_fan_speed && g_fan_power)
             {
-                ESP_LOGI("spin","Fan Index %d",fan_index);
                 if(speed_skip == 0)
                 {
                     lv_img_set_src(fan_object, fanImages[fan_index++]);
