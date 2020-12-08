@@ -146,11 +146,20 @@ void display_house_init()
 void display_lights_off(void)
 {
     ESP_LOGI("display","lights off");
+    xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
+
+    lv_img_set_src(light_object, &house_off);
+
+    xSemaphoreGive(xGuiSemaphore);
 }
 
 void display_lights_on(int h, int s, int v)
 {
-    ESP_LOGI("display","lights on");
+    xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
+
+    lv_img_set_src(light_object, &house_on);
+
+    xSemaphoreGive(xGuiSemaphore);
 }
 
 void display_fan_speed(int s)
