@@ -20,7 +20,7 @@
 
 /* Fan Parameters */
 #define DEFAULT_FAN_POWER           false
-#define DEFAULT_FAN_SPEED           3
+#define DEFAULT_FAN_SPEED           0
 
 /* Temperature Parameters */
 #define DEFAULT_TEMPERATURE         25.0

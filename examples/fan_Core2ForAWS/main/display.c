@@ -260,8 +260,6 @@ void display_temperature(float c)
 
     int rect_height = (int)(((float)THREAD_HEIGHT * (c - minTemp_c)) / (maxTemp_c - minTemp_c));
 
-    ESP_LOGI(TAG,"rect height %d",rect_height);
-
     xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
 
     lv_color_t tc;
