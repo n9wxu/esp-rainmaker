@@ -13,6 +13,6 @@ void display_fan_speed(int s);
 void display_fan_off(void);
 void display_fan_on(void);
 
-void display_temperature(int c);
+void display_temperature(float c);
 
 #endif

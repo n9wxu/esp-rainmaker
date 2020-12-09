@@ -253,18 +253,12 @@ void display_switch_off()
     ESP_LOGI(TAG,"switch off");
 }
 
-void display_temperature(int c)
+void display_temperature(float c)
 {
-    const int base = 0;
-    const int top = 100;
-    const int height = top - base;
-
     const float maxTemp_c = 100.0;
     const float minTemp_c = 0.0;
 
-    const float currentTemp_c = c;
-
-    int rect_height = (int)(((float)THREAD_HEIGHT * ((float)c - minTemp_c)) / (maxTemp_c - minTemp_c));
+    int rect_height = (int)(((float)THREAD_HEIGHT * (c - minTemp_c)) / (maxTemp_c - minTemp_c));
 
     ESP_LOGI(TAG,"rect height %d",rect_height);
 
@@ -284,9 +278,9 @@ void display_temperature(int c)
         }
     }
 
-    lv_label_set_text_fmt(temperature_label,"%dC",c);
+    lv_label_set_text_fmt(temperature_label,"%dC",(int)c);
 
-    ESP_LOGI(TAG,"temperature %d",c);
+    ESP_LOGI(TAG,"temperature %d",(int)c);
 
 
     xSemaphoreGive(xGuiSemaphore);

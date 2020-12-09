@@ -9,6 +9,8 @@
 
 #include "display.h"
 
+#include "mpu6886.h"
+
 static esp_rmaker_device_t *temp_sensor_device;
 static esp_timer_handle_t sensor_timer;
 
@@ -16,15 +18,8 @@ static float g_temperature = DEFAULT_TEMPERATURE;
 
 static void temperature_sensor_update(void *priv)
 {
-    static float delta = 0.5;
-
     // TODO: Configure this to read the temperature sensor
-    g_temperature += delta;
-    if (g_temperature > 99) {
-        delta = -0.5;
-    } else if (g_temperature < 1) {
-        delta = 0.5;
-    }
+    MPU6886_GetTempData(&g_temperature);
 
     display_temperature(g_temperature);
 
@@ -35,6 +30,8 @@ static void temperature_sensor_update(void *priv)
 
 void temperature_init(esp_rmaker_node_t *node)
 {
+    MPU6886_Init();
+    MPU6886_GetTempData(&g_temperature);
     /* Create a Temperature Sensor device and add the relevant parameters to it */
     temp_sensor_device = esp_rmaker_temp_sensor_device_create("Temperature Sensor", NULL, DEFAULT_TEMPERATURE);
     esp_rmaker_node_add_device(node, temp_sensor_device);
