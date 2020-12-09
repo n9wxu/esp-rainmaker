@@ -5,6 +5,8 @@
 #include <esp_rmaker_standard_params.h>
 #include <esp_rmaker_standard_devices.h>
 
+#include "display.h"
+
 #include "user_parameters.h"
 
 static esp_rmaker_device_t *temp_sensor_device;
@@ -23,6 +25,9 @@ static void temperature_sensor_update(void *priv)
     } else if (g_temperature < 1) {
         delta = 0.5;
     }
+
+    display_temperature(g_temperature);
+
     esp_rmaker_param_update_and_report(
                 esp_rmaker_device_get_param_by_type(temp_sensor_device, ESP_RMAKER_PARAM_TEMPERATURE),
                 esp_rmaker_float(g_temperature));
@@ -44,5 +49,9 @@ void temperature_init(esp_rmaker_node_t *node)
     if (esp_timer_create(&sensor_timer_conf, &sensor_timer) == ESP_OK) {
         esp_timer_start_periodic(sensor_timer, REPORTING_PERIOD * 1000000U);
     }
+
+    display_temperature_init();
+    display_temperature(100);
+
 }
 

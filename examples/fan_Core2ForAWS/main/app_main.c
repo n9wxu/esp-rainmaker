@@ -26,6 +26,7 @@
 #include "display.h"
 #include "fan.h"
 #include "light.h"
+#include "temperature.h"
 
 static const char *TAG = "app_main";
 
@@ -67,8 +68,9 @@ void app_main()
         abort();
     }
 
-    fan_init(node);
     light_init(node);
+    temperature_init(node);
+    fan_init(node);
 
     /* Enable scheduling.
      * Please note that you also need to set the timezone for schedules to work correctly.

@@ -2,6 +2,7 @@ idf_component_register(SRCS
                        ./app_driver.c
                        ./app_main.c
                        ./fan.c
+                       ./temperature.c
                        ./display.c
                        ./fan_1.c
                        ./fan_2.c

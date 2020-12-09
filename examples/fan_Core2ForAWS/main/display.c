@@ -33,11 +33,19 @@ static const lv_img_dsc_t* fanImages[] = {&fan_1,&fan_2,&fan_3,&fan_4,&fan_5,&fa
 #define CANVAS_HEIGHT 60
 static lv_color_t window_buffer[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(CANVAS_WIDTH,CANVAS_HEIGHT)];
 static lv_obj_t *window_object;
+
 static lv_obj_t *light_object;
 static lv_obj_t *fan_object;
-static lv_obj_t *temperature_object;
+
 static lv_obj_t *fan_strength_slider;
 static lv_obj_t *fan_sw1;
+
+static lv_obj_t *temperature_object;
+#define THREAD_WIDTH 10
+#define THREAD_HEIGHT 112
+static lv_color_t temperature_buffer[LV_CANVAS_BUF_SIZE_INDEXED_1BIT(THREAD_WIDTH, THREAD_HEIGHT)];
+static lv_obj_t *thread_object;
+static lv_obj_t *temperature_label;
 
 static int g_fan_speed = 0;
 static bool g_fan_power = false;
@@ -107,13 +115,13 @@ void display_fan_init()
 
     fan_object = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(fan_object, &fan_off);
-    lv_obj_align(fan_object, lv_scr_act(), LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    lv_obj_align(fan_object, lv_scr_act(), LV_ALIGN_IN_TOP_RIGHT, -20, 0);
     ESP_LOGI(TAG,"configured fan_object");
 
     fan_strength_slider = lv_slider_create(lv_scr_act(), NULL);
     lv_obj_set_width(fan_strength_slider, 8);
     lv_obj_set_height(fan_strength_slider, 80);
-    lv_obj_align(fan_strength_slider, fan_object, LV_ALIGN_IN_RIGHT_MID, -10, 0);
+    lv_obj_align(fan_strength_slider, fan_object, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
     lv_obj_set_event_cb(fan_strength_slider, strength_slider_event_cb);
     lv_slider_set_value(fan_strength_slider, 0, LV_ANIM_OFF);
     lv_slider_set_range(fan_strength_slider, 0, 5);
@@ -122,7 +130,7 @@ void display_fan_init()
 
     fan_sw1 = lv_switch_create(lv_scr_act(), NULL);
     lv_obj_set_size(fan_sw1, 60, 20);
-    lv_obj_align(fan_sw1, fan_object, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0);
+    lv_obj_align(fan_sw1, fan_object, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
     lv_obj_set_event_cb(fan_sw1, sw1_event_handler);
     lv_switch_off(fan_sw1, LV_ANIM_OFF);
     ESP_LOGI(TAG,"configured fan_sw1");
@@ -134,12 +142,11 @@ void display_fan_init()
     ESP_LOGI(TAG,"fan configured");
 }
 
-void display_house_init()
+void display_house_init(void)
 {
     xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
     ESP_LOGI(TAG,"configuring the house");
 
-    
     light_object = lv_img_create(lv_scr_act(),NULL);
     lv_img_set_src(light_object, &house_off);
     lv_obj_align(light_object,lv_scr_act(),LV_ALIGN_IN_TOP_LEFT,0,0);
@@ -154,14 +161,47 @@ void display_house_init()
     lv_canvas_fill_bg(window_object,c,LV_OPA_100);
 
     lv_obj_move_background(window_object);
+    lv_img_set_src(light_object, &house_off);
+    lv_obj_align(light_object,lv_scr_act(),LV_ALIGN_IN_TOP_LEFT,0,0);
 
     xSemaphoreGive(xGuiSemaphore);
     ESP_LOGI(TAG,"house configured");
 }
 
+void display_temperature_init(void)
+{
+    xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
+    ESP_LOGI(TAG,"configuring the temperature");
+    temperature_object = lv_img_create(lv_scr_act(),NULL);
+    lv_img_set_src(temperature_object, &thermometer);
+    lv_obj_align(temperature_object,lv_scr_act(),LV_ALIGN_IN_BOTTOM_RIGHT,0,-10);
+
+    thread_object = lv_canvas_create(lv_scr_act(),NULL);
+    lv_obj_align(thread_object, temperature_object, LV_ALIGN_IN_TOP_LEFT,15,0);
+    lv_canvas_set_buffer(thread_object, temperature_buffer, THREAD_WIDTH, THREAD_HEIGHT, LV_IMG_CF_INDEXED_1BIT);
+    lv_canvas_set_palette(thread_object,0,LV_COLOR_GRAY);
+    lv_canvas_set_palette(thread_object,1,LV_COLOR_ORANGE);
+    lv_color_t c;
+    c.full = 0;
+    lv_canvas_fill_bg(thread_object,c,LV_OPA_100);
+
+    lv_obj_move_background(thread_object);
+
+    temperature_label = lv_label_create(lv_scr_act(),NULL);
+    lv_obj_align(temperature_label, temperature_object, LV_ALIGN_IN_BOTTOM_LEFT, 50, -30);
+    lv_obj_set_width(temperature_label,75);
+    _lv_obj_set_style_local_ptr(temperature_label, LV_OBJ_PART_MAIN, LV_STYLE_TEXT_FONT, &lv_font_montserrat_16);  /*Set a larger font*/
+    lv_label_set_align(temperature_label,LV_LABEL_ALIGN_CENTER);
+    lv_label_set_text(temperature_label,"25C");
+
+
+    xSemaphoreGive(xGuiSemaphore);
+    ESP_LOGI(TAG,"temperature configured");
+}
+
 void display_lights_off(void)
 {
-    ESP_LOGI("display","lights off");
+    ESP_LOGI(TAG,"lights off");
     xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
 
     lv_img_set_src(light_object, &house_off);
@@ -185,35 +225,70 @@ void display_lights_on(int h, int s, int v)
 void display_fan_speed(int s)
 {
     lv_slider_set_value(fan_strength_slider,s,LV_ANIM_OFF);
-    ESP_LOGI("display","fan spinning %d",s);
+    ESP_LOGI(TAG,"fan spinning %d",s);
     g_fan_speed = s;
 }
 
 void display_fan_off()
 {
-    ESP_LOGI("display","fan off");
+    ESP_LOGI(TAG,"fan off");
     lv_switch_off(fan_sw1, LV_ANIM_OFF);
     g_fan_power = false;
 }
 
 void display_fan_on()
 {
-    ESP_LOGI("display","switch on");
+    ESP_LOGI(TAG,"switch on");
     lv_switch_on(fan_sw1, LV_ANIM_OFF);
     g_fan_power = true;
 }
 
 void display_switch_on()
 {
-    ESP_LOGI("display","switch on");
+    ESP_LOGI(TAG,"switch on");
 }
 
 void display_switch_off()
 {
-    ESP_LOGI("display","switch off");
+    ESP_LOGI(TAG,"switch off");
 }
 
 void display_temperature(int c)
 {
-    ESP_LOGI("display","temperature %d",c);
+    const int base = 0;
+    const int top = 100;
+    const int height = top - base;
+
+    const float maxTemp_c = 100.0;
+    const float minTemp_c = 0.0;
+
+    const float currentTemp_c = c;
+
+    int rect_height = (int)(((float)THREAD_HEIGHT * ((float)c - minTemp_c)) / (maxTemp_c - minTemp_c));
+
+    ESP_LOGI(TAG,"rect height %d",rect_height);
+
+    xSemaphoreTake(xGuiSemaphore, portMAX_DELAY);
+
+    lv_color_t tc;
+    tc.full = 0;
+    lv_canvas_fill_bg(thread_object,tc,LV_OPA_100);
+
+    tc.full = 1;
+
+    for(int x=0;x<THREAD_WIDTH;x++)
+    {
+        for(int y=0;y<rect_height;y++)
+        {
+            lv_canvas_set_px(thread_object,x,THREAD_HEIGHT-y,tc);
+        }
+    }
+
+    lv_label_set_text_fmt(temperature_label,"%dC",c);
+
+    ESP_LOGI(TAG,"temperature %d",c);
+
+
+    xSemaphoreGive(xGuiSemaphore);
+
 }
