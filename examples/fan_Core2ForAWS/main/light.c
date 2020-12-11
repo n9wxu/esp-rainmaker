@@ -19,8 +19,6 @@
 
 #define TAG "light"
 
-const int light_pin = GPIO_NUM_2;
-
 #define DEFAULT_HUE         180
 #define DEFAULT_SATURATION  100
 #define DEFAULT_BRIGHTNESS  25
@@ -72,7 +70,7 @@ void light_init(esp_rmaker_node_t *node)
 
     Core2ForAWS_Sk6812_Init();
 
-    Core2ForAWS_Sk6812_SetBrightness(DEFAULT_BRIGHTNESS);
+    Core2ForAWS_Sk6812_SetBrightness(255);
 
     light_set_on(false);
 
