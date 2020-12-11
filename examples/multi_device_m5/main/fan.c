@@ -10,12 +10,15 @@
 
 #include "display.h"
 
+#include "core2forAWS.h"
+
 #include "user_parameters.h"
 
 #define TAG "FAN"
 
 static esp_rmaker_device_t *fan_device;
 static int g_fan_speed = DEFAULT_FAN_SPEED;
+static bool g_fan_power = DEFAULT_FAN_POWER;
 
 /* Callback to handle commands received from the RainMaker cloud */
 static esp_err_t fan_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *param,
@@ -29,19 +32,11 @@ static esp_err_t fan_cb(const esp_rmaker_device_t *device, const esp_rmaker_para
     if (strcmp(param_name, ESP_RMAKER_DEF_POWER_NAME) == 0) {
         ESP_LOGI(TAG, "Received value = %s for %s - %s",
                 val.val.b? "true" : "false", device_name, param_name);
-        if(val.val.b)
-        {
-            fan_set_speed(g_fan_speed);
-        }
-        else
-        {
-            fan_set_speed(0);
-        }
+        fan_set_power(val.val.b);
     } else if (strcmp(param_name, ESP_RMAKER_DEF_SPEED_NAME) == 0) {
         ESP_LOGI(TAG, "Received value = %d for %s - %s",
                 val.val.i, device_name, param_name);
-        g_fan_speed = val.val.i;
-        fan_set_speed(g_fan_speed);
+        fan_set_speed( val.val.i);
     } else {
         /* Silently ignoring invalid params */
         return ESP_OK;
@@ -57,17 +52,45 @@ void fan_init(esp_rmaker_node_t *node)
     esp_rmaker_device_add_cb(fan_device, fan_cb, NULL);
     esp_rmaker_device_add_param(fan_device, esp_rmaker_speed_param_create(ESP_RMAKER_DEF_SPEED_NAME, DEFAULT_FAN_SPEED));
     esp_rmaker_node_add_device(node, fan_device);
+
+    display_fan_init();
 }
 
 void fan_set_speed(int speed)
 {
-    if(speed == 0)
+    g_fan_speed = speed;
+    if(g_fan_power)
     {
-        display_fan_off();
+        Core2ForAWS_Motor_SetStrength(g_fan_speed * 20);
     }
-    else
-    {
-        display_fan_spinning(speed);
+    display_fan_speed(g_fan_speed);
+}
+
+void fan_power_report(void)
+{
+    esp_rmaker_param_update_and_report(
+            esp_rmaker_device_get_param_by_type(fan_device, ESP_RMAKER_PARAM_POWER),
+            esp_rmaker_bool(g_fan_power));
+}
+
+void fan_speed_report(void)
+{
+    esp_rmaker_param_update_and_report(
+        esp_rmaker_device_get_param_by_type(fan_device, ESP_RMAKER_PARAM_SPEED),
+        esp_rmaker_int(g_fan_speed));
+}
+
+void fan_set_power(bool power)
+{
+    g_fan_power = power;
+    if (power) {
+        int speed = g_fan_speed * 20;
+        ESP_LOGI(TAG,"power up, speed=%d",speed);
+        Core2ForAWS_Motor_SetStrength(speed);
+        display_fan_on();
+    } else {
+        Core2ForAWS_Motor_SetStrength(0);
+        display_fan_off();
     }
 }
 

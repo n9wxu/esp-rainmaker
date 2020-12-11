@@ -22,7 +22,6 @@
 
 #include "light.h"
 #include "fan.h"
-#include "switch.h"
 #include "temperature.h"
 #include "display.h"
 #include "user_parameters.h"
@@ -71,7 +70,6 @@ void app_main()
     light_init(node);
     fan_init(node);
     temperature_init(node);
-    switch_init(node);
 
     /* Enable scheduling.
      * Please note that you also need to set the timezone for schedules to work correctly.

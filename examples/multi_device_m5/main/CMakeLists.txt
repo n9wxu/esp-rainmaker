@@ -3,24 +3,17 @@ idf_component_register(SRCS
         ./fan.c
         ./light.c
         ./temperature.c
-        ./switch.c
         ./display.c
-        ./button_off.c
-        ./button_on.c
-        ./one.c
-        ./two.c
-        ./three.c
-        ./four.c
-        ./five.c
-        ./six.c
-        ./seven.c
-        ./eight.c
-        ./nine.c
-        ./ten.c
-        ./eleven.c
-        ./fanoff.c
+        ./fan_1.c
+        ./fan_2.c
+        ./fan_3.c
+        ./fan_4.c
+        ./fan_5.c
+        ./fan_6.c
+        ./fan_off.c
         ./house_on.c
         ./house_off.c
         ./thermometer.c
+        ./hsv2rgb.c
         INCLUDE_DIRS ".")
 
