@@ -49,7 +49,6 @@ static lv_obj_t *temperature_label;
 
 static int g_fan_speed = 0;
 static bool g_fan_power = false;
-static bool screenConfigured = false;
 
 static void spin_update(void *priv)
 {
@@ -187,12 +186,17 @@ void display_temperature_init(void)
 
     lv_obj_move_background(thread_object);
 
+    lv_obj_t *label = lv_label_create(lv_scr_act(), NULL);
+    lv_obj_align(label, temperature_object, LV_ALIGN_IN_RIGHT_MID, -75, -15);
+    lv_label_set_align(label,LV_LABEL_ALIGN_CENTER);
+    lv_label_set_text(label, "Internal\nTemperature");
+
     temperature_label = lv_label_create(lv_scr_act(),NULL);
-    lv_obj_align(temperature_label, temperature_object, LV_ALIGN_IN_BOTTOM_LEFT, 50, -30);
+    lv_obj_align(temperature_label, label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_obj_set_width(temperature_label,75);
     _lv_obj_set_style_local_ptr(temperature_label, LV_OBJ_PART_MAIN, LV_STYLE_TEXT_FONT, &lv_font_montserrat_16);  /*Set a larger font*/
     lv_label_set_align(temperature_label,LV_LABEL_ALIGN_CENTER);
-    lv_label_set_text(temperature_label,"25C");
+    lv_label_set_text(temperature_label,"");
 
 
     xSemaphoreGive(xGuiSemaphore);
