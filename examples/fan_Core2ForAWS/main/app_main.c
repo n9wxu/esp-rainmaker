@@ -40,6 +40,7 @@ void app_main()
     spi_mutex = xSemaphoreCreateMutex();
 
     Core2ForAWS_Init();
+    Core2ForAWS_PMU_Init(3300, 0, 0, 2700);   
     display_init();
     Core2ForAWS_Button_Init();
 
