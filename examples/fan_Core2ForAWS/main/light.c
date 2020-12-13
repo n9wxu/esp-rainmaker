@@ -89,20 +89,13 @@ void light_init(esp_rmaker_node_t *node)
 
 }
 
-uint32_t makeColor(uint32_t hue, uint32_t saturation, uint32_t brightness)
-{
-    uint32_t color;
-    color = hsv2rgb(hue, saturation, brightness);
-    return color;
-}
-
 void light_set_on(bool on)
 {
     isOn = on;
     if(on)
     {
         //uint32_t color = hsb_to_rgb_int(hue,saturation,brightness);
-        uint32_t color = makeColor(hue,saturation, brightness);
+        uint32_t color = hsv2rgb(hue,saturation, brightness);
 
         Core2ForAWS_Sk6812_SetSideColor(SK6812_SIDE_LEFT,  color);
         Core2ForAWS_Sk6812_SetSideColor(SK6812_SIDE_RIGHT, color);
