@@ -282,9 +282,5 @@ void display_temperature(float c)
 
     lv_label_set_text_fmt(temperature_label,"%dC",(int)c);
 
-    ESP_LOGI(TAG,"temperature %d",(int)c);
-
-
     xSemaphoreGive(xGuiSemaphore);
-
 }
